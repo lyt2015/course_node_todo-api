@@ -92,6 +92,8 @@ app.patch('/todos/:id', (req, res) => {
     } else {
       body.completedAt = null;
     }
+  } else {
+    delete body.completed;
   }
 
   Todo.findByIdAndUpdate(id, { $set: body }, { new: true })

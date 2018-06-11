@@ -12,7 +12,9 @@ const todos = [
   },
   {
     _id: new ObjectID(),
-    text: 'Go fishing on Sunday'
+    text: 'Go fishing on Sunday',
+    completed: true,
+    completedAt: 777
   }
 ];
 
@@ -90,8 +92,10 @@ describe('GET /todos', () => {
 
 describe('GET /todos:id', () => {
   it('should return a todo doc', done => {
+    let id = todos[0]._id.toHexString();
+
     request(app)
-      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .get(`/todos/${id}`)
       .expect(200)
       .expect(res => {
         expect(res.body.doc.text).toBe(todos[0].text);
@@ -155,6 +159,47 @@ describe('DELETE /todos/:id', () => {
     request(app)
       .delete(`/todos/123`)
       .expect(404)
+      .end(done);
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  it('should update the todo with the given ID', done => {
+    let id = todos[0]._id.toHexString();
+    let text = 'Go finding some kabutomushi';
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .type('json')
+      .send({
+        text,
+        completed: true
+      })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.doc.text).toBe(text);
+        expect(res.body.doc.completed).toBe(true);
+        expect(res.body.doc.completedAt).toBeA('number');
+      })
+      .end(done);
+  });
+
+  it('should clear completedAt when todo is not completed', done => {
+    let id = todos[1]._id.toHexString();
+    let text = 'Go finding some kabutomushi';
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        text,
+        completed: false
+      })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.doc.text).toBe(text);
+        expect(res.body.doc.completed).toBe(false);
+        expect(res.body.doc.completedAt).toNotExist();
+      })
       .end(done);
   });
 });
