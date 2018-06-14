@@ -31,19 +31,18 @@ app.post('/users', (req, res) => {
     });
 });
 
-app.post('/todos', (req, res) => {
-  let todo = new Todo({
-    text: req.body.text
-  });
+app.post('/users/login', (req, res) => {
+  let { email, password } = _.pick(req.body, ['email', 'password']);
 
-  todo.save().then(
-    doc => {
-      res.send(doc);
-    },
-    err => {
+  User.findByCredentials(email, password)
+    .then(user => {
+      user.generateAuthToken().then(token => {
+        res.header('x-auth', token).send(user);
+      });
+    })
+    .catch(err => {
       res.status(400).send(err);
-    }
-  );
+    });
 });
 
 app.get('/users/me', authenticate, (req, res) => {
@@ -54,6 +53,21 @@ app.get('/todos', (req, res) => {
   Todo.find().then(
     docs => {
       res.send({ docs });
+    },
+    err => {
+      res.status(400).send(err);
+    }
+  );
+});
+
+app.post('/todos', (req, res) => {
+  let todo = new Todo({
+    text: req.body.text
+  });
+
+  todo.save().then(
+    doc => {
+      res.send(doc);
     },
     err => {
       res.status(400).send(err);
