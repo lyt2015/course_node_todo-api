@@ -4,12 +4,12 @@ const authenticate = (req, res, next) => {
   let token = req.header('x-auth');
 
   User.findByToken(token)
-    .then(doc => {
-      if (!doc) {
+    .then(user => {
+      if (!user) {
         return Promise.reject();
       }
 
-      req.doc = doc;
+      req.user = user;
       req.token = token;
       next();
     })
