@@ -24,7 +24,13 @@ const users = [
   {
     _id: userTwoID,
     email: 'userTwo@example.com',
-    password: 'passwordTwo'
+    password: 'passwordTwo',
+    tokens: [
+      {
+        access: 'auth',
+        token: jwt.sign({ _id: userTwoID.toHexString(), access: 'auth' }, salt).toString()
+      }
+    ]
   }
 ];
 
@@ -44,13 +50,15 @@ const populateUsers = done => {
 const todos = [
   {
     _id: new ObjectID(),
-    text: 'Go fishing on Saturday'
+    text: 'Go fishing on Saturday',
+    _creator: userOneID
   },
   {
     _id: new ObjectID(),
     text: 'Go fishing on Sunday',
     completed: true,
-    completedAt: 777
+    completedAt: 777,
+    _creator: userTwoID
   }
 ];
 
