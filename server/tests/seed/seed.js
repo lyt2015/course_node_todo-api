@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { Todo } = require('../../models/todo');
 const { User } = require('../../models/user');
 
-const salt = 'the salt string';
+const salt = process.env.JWT_SECRET;
 
 const userOneID = new ObjectID();
 const userTwoID = new ObjectID();

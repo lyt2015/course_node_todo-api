@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
-const salt = 'the salt string';
+const salt = process.env.JWT_SECRET;
 
 const UserSchema = new mongoose.Schema({
   email: {
