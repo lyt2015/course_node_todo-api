@@ -136,7 +136,7 @@ describe('DELETE /todos/:id', () => {
 
         Todo.findById(res.body.doc._id)
           .then(doc => {
-            expect(doc).toNotExist();
+            expect(doc).toBeFalsy();
             done();
           })
           .catch(err => {
@@ -159,7 +159,7 @@ describe('DELETE /todos/:id', () => {
 
         Todo.findById(id)
           .then(doc => {
-            expect(doc).toExist();
+            expect(doc).toBeTruthy();
             done();
           })
           .catch(err => {
@@ -201,7 +201,7 @@ describe('PATCH /todos/:id', () => {
       .expect(res => {
         expect(res.body.doc.text).toBe(text);
         expect(res.body.doc.completed).toBe(true);
-        expect(res.body.doc.completedAt).toBeA('number');
+        expect(res.body.doc.completedAt).toEqual(expect.any(Number));
       })
       .end(done);
   });
@@ -241,7 +241,7 @@ describe('PATCH /todos/:id', () => {
       .expect(res => {
         expect(res.body.doc.text).toBe(text);
         expect(res.body.doc.completed).toBe(false);
-        expect(res.body.doc.completedAt).toNotExist();
+        expect(res.body.doc.completedAt).toBeFalsy();
       })
       .end(done);
   });
@@ -281,8 +281,8 @@ describe('POST /users', () => {
       .send({ email, password })
       .expect(200)
       .expect(res => {
-        expect(res.headers['x-auth']).toExist();
-        expect(res.body._id).toExist();
+        expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
         expect(res.body.email).toBe(email);
       })
       .end(err => {
@@ -292,8 +292,8 @@ describe('POST /users', () => {
 
         User.findOne({ email })
           .then(user => {
-            expect(user).toExist();
-            expect(user.password).toNotBe(password);
+            expect(user).toBeTruthy();
+            expect(user.password).not.toBe(password);
 
             done();
           })
@@ -337,7 +337,7 @@ describe('POST /users/login', () => {
       .send({ email, password })
       .expect(200)
       .expect(res => {
-        expect(res.headers['x-auth']).toExist();
+        expect(res.headers['x-auth']).toBeTruthy();
       })
       .end((err, res) => {
         if (err) {
@@ -346,11 +346,22 @@ describe('POST /users/login', () => {
 
         User.findOne({ email })
           .then(user => {
-            expect(user).toExist();
-            expect(user.tokens[1]).toInclude({
+            expect(user).toBeTruthy();
+
+            expect(user.toObject().tokens[1]).toMatchObject({
               access: 'auth',
               token: res.headers['x-auth']
             });
+
+            // the code below also works
+            /*
+            expect(user.tokens[1]).toEqual(
+              expect.objectContaining({
+                access: 'auth',
+                token: res.headers['x-auth']
+              })
+            );
+            */
 
             done();
           })
@@ -368,7 +379,7 @@ describe('POST /users/login', () => {
       .send({ email, password })
       .expect(400)
       .expect(res => {
-        expect(res.headers['x-auth']).toNotExist();
+        expect(res.headers['x-auth']).toBeFalsy();
       })
       .end((err, res) => {
         if (err) {
@@ -377,7 +388,7 @@ describe('POST /users/login', () => {
 
         User.findOne({ email })
           .then(user => {
-            expect(user).toExist();
+            expect(user).toBeTruthy();
             expect(user.tokens.length).toBe(1);
 
             done();
@@ -398,7 +409,7 @@ describe('DELETE /users/me/token', () => {
       .set('x-auth', user.tokens[0].token)
       .expect(200)
       .expect(res => {
-        expect(res.headers['x-auth']).toNotExist();
+        expect(res.headers['x-auth']).toBeFalsy();
       })
       .end((err, res) => {
         if (err) {
@@ -407,7 +418,7 @@ describe('DELETE /users/me/token', () => {
 
         User.findOne({ email: user.email })
           .then(doc => {
-            expect(doc).toExist();
+            expect(doc).toBeTruthy();
             expect(doc.tokens.length).toBe(0);
 
             done();
