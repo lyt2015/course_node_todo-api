@@ -1,5 +1,3 @@
-// modify functions to use async await
-
 require('./config/config')
 
 const _ = require('lodash')
